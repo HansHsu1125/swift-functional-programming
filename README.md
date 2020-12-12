@@ -200,39 +200,35 @@ The case is focus on how to executes tasks concurrently and wait all tasks compl
 ### Example
 
 ```
+// Exapmle for run async task and bind together
 var totalVaule = 0
 
-GroupsTasks.init { (clouse) in
+GroupTasksManager.init { (clouse) in
     print("execute step 1-1")
     DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + 10) {
         print("execute step 1-2")
         totalVaule += 10
         clouse()
     }
-}.toDo { () -> GroupsTasks in
+}.bind { (clouse) in
     print("execute step 2-1")
-    return .init { (clouse) in
-        DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + 7) {
-            print("execute step 2-2")
-            totalVaule += 20
-            clouse()
-        }
+    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + 7) {
+        print("execute step 2-2")
+        totalVaule += 20
+        clouse()
     }
-}.toDo { () -> GroupsTasks in
+}.bind { (clouse) in
     print("execute step 3-1")
-    return .init { (clouse) in
-        DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + 2) {
-            print("execute step 3-2")
-            totalVaule += 30
-            clouse()
-        }
+    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + 2) {
+        print("execute step 3-2")
+        totalVaule += 30
+        clouse()
     }
 }.await {
     print("await to execute totalVaule : \(totalVaule)")
 }
 
-===== Result =====
-
+Result ==============>
 execute step 1-1
 execute step 2-1
 execute step 3-1
@@ -266,9 +262,7 @@ DispatchQueue.once(remove: token)
 count += 1
 printCountValue()
 
-===== Result =====
-
+Result ==============>
 print count value 1
 print count value 3
-
 ```
