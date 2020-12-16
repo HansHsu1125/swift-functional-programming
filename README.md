@@ -1,5 +1,5 @@
 # Swift Functional Programming
-Here is my simple example for functional programming of Swift. These cases are simple demo , it just used to display how to design the architecture. If you want to use it of your project , you need to implement more features.
+This is my simple example for functional programming of Swift. These cases are simple demo , it just used to display how to design the architecture. If you want to use it of your project , you need to implement more features.
 
 ## Curry with Result
 The case is use Curry with Result to genenrate object.
