@@ -7,8 +7,6 @@
 
 import UIKit
 
-var str = "Hello, playground"
-
 // Custom operator for pipeline
 infix operator <> : DefaultPrecedence
 typealias PipelineHandler<T> = (T) -> Bool
@@ -17,18 +15,18 @@ typealias PipelineHandler<T> = (T) -> Bool
 protocol Piplineable {
     associatedtype DataType
     init(_ pipelineHandler:@escaping PipelineHandler<DataType>)
-    func execute(_ data:DataType) -> Bool
-    static func <>(lhs:Self , rhs:Self) -> Self
+    func execute(_ data: DataType) -> Bool
+    static func <>(lhs: Self , rhs: Self) -> Self
 }
 
 // Defualt implement
 extension Piplineable {
-    func execute(_ data:DataType) -> Bool {
+    func execute(_ data: DataType) -> Bool {
         print("\(#function) this is default implement")
         return false
     }
     
-    static func <> (lhs:Self , rhs:Self) -> Self {
+    static func <> (lhs: Self , rhs: Self) -> Self {
         return .init { lhs.execute($0) || rhs.execute($0) }
     }
 }
@@ -36,22 +34,22 @@ extension Piplineable {
 // Struct for pipeline task
 struct PipelineTask<T> {
     typealias DataType = T
-    let handler:PipelineHandler<T>
+    let handler: PipelineHandler<T>
     
-    init(_ pipelineHandler:@escaping PipelineHandler<T>) {
+    init(_ pipelineHandler: @escaping PipelineHandler<T>) {
         handler = pipelineHandler
     }
 }
 
 // Implement Piplineable protocol of PipelineTask
 extension PipelineTask : Piplineable {
-    func execute(_ data:DataType) -> Bool {
+    func execute(_ data: DataType) -> Bool {
         return handler(data)
     }
 }
 
 // PipelineTaskManager control pipeline task
-class PipelineManager<T:Piplineable> {
+class PipelineManager<T: Piplineable> {
     typealias DataType = T.DataType
     var mainTask:T
     
@@ -69,7 +67,7 @@ extension PipelineManager : Piplineable {
 
 // Add append api
 extension PipelineManager {
-    func append<U:Piplineable>(_ task:U) -> Bool where U.DataType == T.DataType {
+    func append<U : Piplineable>(_ task: U) -> Bool where U.DataType == T.DataType {
         guard let transformTask = task as? T else {
             return false
         }
@@ -80,7 +78,7 @@ extension PipelineManager {
 }
 
 extension String {
-    func isLengthOverLimitation(_ limitation:Int) -> Bool {
+    func isLengthOverLimitation(_ limitation: Int) -> Bool {
         guard !isEmpty else {
             return false
         }
@@ -96,19 +94,19 @@ extension String {
 //Example for verify value by PipelineManager
 
 // Default task is verify nil value
-let pipelineManager:PipelineManager<PipelineTask<String?>> = .init {
+let pipelineManager: PipelineManager<PipelineTask<String?>> = .init {
     $0 == nil
 }
 
 // Append verfiy emplty task
-let verifyEmptyTask:PipelineTask<String?> = .init {
+let verifyEmptyTask: PipelineTask<String?> = .init {
     ($0?.isEmpty == true)
 }
 pipelineManager.append(verifyEmptyTask)
 
 // Append verfiy limitation task
-let limitation:Int = 10
-let verifyOverLimitationTask:PipelineTask<String?> = .init {
+let limitation: Int = 10
+let verifyOverLimitationTask: PipelineTask<String?> = .init {
     $0?.isLengthOverLimitation(10) == true
 }
 pipelineManager.append(verifyOverLimitationTask)

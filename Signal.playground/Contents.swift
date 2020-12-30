@@ -19,15 +19,15 @@ enum Event<Element> {
 
 protocol Observerable {
     associatedtype Event
-    init(_ action:@escaping EventHandler<Event>)
-    func sendNext(_ element:Event)
-    func sendError(_ error:Error)
+    init(_ action: @escaping EventHandler<Event>)
+    func sendNext(_ element: Event)
+    func sendError(_ error: Error)
 }
 
 struct Observer<E> {
-    private let _action:EventHandler<Event>
+    private let _action: EventHandler<Event>
     
-    init(_ action:@escaping EventHandler<Event>) {
+    init(_ action: @escaping EventHandler<Event>) {
         _action = action
     }
 }
@@ -35,29 +35,29 @@ struct Observer<E> {
 extension Observer : Observerable {
     typealias Event = E
     
-    func sendNext(_ element:Event) {
+    func sendNext(_ element: Event) {
         _action(.next(element))
     }
     
-    func sendError(_ error:Error) {
+    func sendError(_ error: Error) {
         _action(.failed(error))
     }
 }
 
 protocol Signalable {
     associatedtype Event
-    associatedtype ObserverType : Observerable
+    associatedtype ObserverType: Observerable
     
-    var observer:ObserverType? { get }
-    init(_ value:Event)
-    func subcrise(_ next:((Event) -> ())? , _ error:((Error) -> ())?)
+    var observer: ObserverType? { get }
+    init(_ value: Event)
+    func subcrise(_ next: ((Event) -> ())? , _ error: ((Error) -> ())?)
 }
 
 class Signal<E> {
-    private var _value:Event?
-    private var _observer:ObserverType?
+    private var _value: Event?
+    private var _observer: ObserverType?
 
-    required init(_ value:Event) {
+    required init(_ value: Event) {
         _value = value
     }
 }
@@ -66,11 +66,11 @@ extension Signal : Signalable {
     typealias Event = E
     typealias ObserverType = Observer<Event>
     
-    var observer:ObserverType? {
+    var observer: ObserverType? {
         return _observer
     }
     
-    func subcrise(_ next:((Event) -> ())? = nil , _ error:((Error) -> ())? = nil) {
+    func subcrise(_ next: ((Event) -> ())? = nil , _ error: ((Error) -> ())? = nil) {
         let originalObserver = _observer
         _observer = .init({ (event) in
             switch event {

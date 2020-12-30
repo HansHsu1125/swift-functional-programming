@@ -13,9 +13,9 @@ import UIKit
 typealias TickGenerator = (String) -> (String) -> (String) -> () -> TicketInfo
 
 struct TicketInfo {
-    let from:String
-    let destination:String
-    let transportation:String
+    let from: String
+    let destination: String
+    let transportation: String
 }
 
 extension TicketInfo : CustomStringConvertible {
@@ -49,28 +49,28 @@ extension TicketError : CustomDebugStringConvertible {
     var debugDescription: String {
         switch self {
         case .incorrectInfo:
-            return "enter incorrect information"
+            return "Enter incorrect information"
         }
     }
 }
 
 // Custom result
-enum Result<T,E:Error> {
+enum Result<T, E : Error> {
     case success(T)
     case failed(E)
 }
 
 // Add pure , error , map , flatMap , apply api
 extension Result {
-    static func pure(_ object:T) -> Result<T,E> {
+    static func pure(_ object: T) -> Result<T, E> {
         return .success(object)
     }
     
-    static func error(_ error:E) -> Result<T,E> {
+    static func error(_ error: E) -> Result<T, E> {
         return .failed(error)
     }
     
-    func map<O>(_ transform:(T) -> O) -> Result<O,E> {
+    func map<O>(_ transform:(T) -> O) -> Result<O, E> {
         switch self {
         case let .success(value):
             return .success(transform(value))
@@ -79,7 +79,7 @@ extension Result {
         }
     }
     
-    func flatMap<O>(_ transform:(T) -> Result<O,E>) -> Result<O,E> {
+    func flatMap<O>(_ transform:(T) -> Result<O, E>) -> Result<O, E> {
         switch self {
         case let .success(value):
             return transform(value)
@@ -88,7 +88,7 @@ extension Result {
         }
     }
     
-    func apply<O>(_ tranform:Result<(T) -> O,E>) -> Result<O,E> {
+    func apply<O>(_ tranform:Result<(T) -> O, E>) -> Result<O, E> {
         switch tranform {
         case let .success(tFunc):
             return map(tFunc)
@@ -101,18 +101,18 @@ extension Result {
 // Cutsom operator for Result
 infix operator <^>:AdditionPrecedence
 
-func <^><T,U,E>(lhs:(T) -> U , rhs:Result<T,E>) -> Result<U,E> {
+func <^><T, U, E>(lhs:(T) -> U , rhs:Result<T, E>) -> Result<U, E> {
     return rhs.map(lhs)
 }
 
 infix operator <*>:AdditionPrecedence
 
-func <*><T,U,E>(lhs:Result<(T) -> U,E> , rhs:Result<T,E>) -> Result<U,E> {
+func <*><T, U, E>(lhs:Result<(T) -> U, E> , rhs:Result<T, E>) -> Result<U, E> {
     return rhs.apply(lhs)
 }
 
 // Cutsom Result for Ticket.
-typealias TicketResult<T> = Result<T,TicketError>
+typealias TicketResult<T> = Result<T, TicketError>
 
 // Example to use TicketBuilder and TicketResult by async way.
 

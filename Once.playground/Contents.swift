@@ -12,7 +12,7 @@ extension DispatchQueue {
         once(token: token, block: block)
     }
 
-    class func once(token: String, block:(String) -> ()) {
+    class func once(token: String, block: (String) -> ()) {
         defer { lock.unlock() }
         lock.lock()
         guard !onceMap.contains(token) else {

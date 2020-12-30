@@ -12,43 +12,43 @@ typealias AsyncExecuteHandler = (@escaping CompleteHandler) -> Void
 
 // AsyncExecuteable protocol
 protocol AsyncExecuteable {
-    init(_ pipelineHandler:@escaping AsyncExecuteHandler)
-    func execute(_ handler:@escaping CompleteHandler)
+    init(_ pipelineHandler: @escaping AsyncExecuteHandler)
+    func execute(_ handler: @escaping CompleteHandler)
 }
 
 // Struct for GroupTasks
 struct GroupTasks {
     let handler:AsyncExecuteHandler
     
-    init(_ asyncExecuteHandler:@escaping AsyncExecuteHandler) {
+    init(_ asyncExecuteHandler: @escaping AsyncExecuteHandler) {
         handler = asyncExecuteHandler
     }
 }
 
 // Implement AsyncExecuteable protocol of PipelineTask
 extension GroupTasks : AsyncExecuteable {
-    func execute(_ conmpleteHandler:@escaping CompleteHandler) {
+    func execute(_ conmpleteHandler: @escaping CompleteHandler) {
         handler(conmpleteHandler)
     }
 }
 
 // Define Awaitable to execute complete handler
 protocol Awaitable {
-    func await(_ queue:DispatchQueue , _ completeHandler:@escaping CompleteHandler)
+    func await(_ queue: DispatchQueue , _ completeHandler: @escaping CompleteHandler)
 }
 
 // Define Groupable to bind tasks
-protocol Groupable: Awaitable {
-    init(_ group:DispatchGroup , _ handler:@escaping AsyncExecuteHandler)
-    func bind(Task task:@escaping AsyncExecuteHandler) -> Self
+protocol Groupable : Awaitable {
+    init(_ group:DispatchGroup , _ handler: @escaping AsyncExecuteHandler)
+    func bind(Task task: @escaping AsyncExecuteHandler) -> Self
 }
 
 // GroupTasksManager to control group tasks
 struct GroupTasksManager {
-    let groups:DispatchGroup
-    var mainTask:GroupTasks
+    let groups: DispatchGroup
+    var mainTask: GroupTasks
     
-    init(_ group:DispatchGroup = .init() , _ handler:@escaping AsyncExecuteHandler) {
+    init(_ group: DispatchGroup = .init() , _ handler: @escaping AsyncExecuteHandler) {
         groups = group
         mainTask = .init(handler)
     }
@@ -63,8 +63,8 @@ struct GroupTasksManager {
 
 // Implement Groupable
 extension GroupTasksManager: Groupable {
-    func bind(Task task:@escaping AsyncExecuteHandler) -> Self {
-        let newTask:GroupTasks = .init(task)
+    func bind(Task task: @escaping AsyncExecuteHandler) -> Self {
+        let newTask: GroupTasks = .init(task)
 
         return .init(groups) { clourse in
             execute()
@@ -74,8 +74,8 @@ extension GroupTasksManager: Groupable {
 }
 
 // Implement Awaitable
-extension GroupTasksManager: Awaitable {
-    func await(_ queue:DispatchQueue = .global() , _ completeHandler:@escaping CompleteHandler) {
+extension GroupTasksManager : Awaitable {
+    func await(_ queue:DispatchQueue = .global() , _ completeHandler: @escaping CompleteHandler) {
         execute()
         groups.notify(queue: queue) {
             completeHandler()

@@ -16,18 +16,18 @@ var str = "Hello, playground"
 typealias PromiseHandler<T> = (@escaping (T) -> ()) -> ()
 
 class Promise<R> {
-    fileprivate let promiseHandler:PromiseHandler<R>
+    fileprivate let promiseHandler: PromiseHandler<R>
 
-    init(_ handler:@escaping PromiseHandler<R>) {
+    init(_ handler: @escaping PromiseHandler<R>) {
         promiseHandler = handler
     }
 }
 
 // Add map , flatMap , apply api
 extension Promise {
-    fileprivate func map<U>(_ handler:@escaping (R) -> U) -> Promise<U> {
+    fileprivate func map<U>(_ handler: @escaping (R) -> U) -> Promise<U> {
         let semaphore = DispatchSemaphore(value: 0)
-        var newValue:U?
+        var newValue: U?
         promiseHandler { value in
             newValue = handler(value)
             semaphore.signal()
@@ -41,7 +41,7 @@ extension Promise {
         }
     }
     
-    fileprivate func map<U>(delay timer:TimeInterval , handler:@escaping (R) -> U) -> Promise<U> {
+    fileprivate func map<U>(delay timer: TimeInterval , handler: @escaping (R) -> U) -> Promise<U> {
         let semaphore = DispatchSemaphore(value: 0)
         var newValue:U?
         DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + timer) {
@@ -59,9 +59,9 @@ extension Promise {
         }
     }
     
-    fileprivate func flatMap<U>(_ handler:@escaping (R) -> Promise<U>) -> Promise<U> {
+    fileprivate func flatMap<U>(_ handler: @escaping (R) -> Promise<U>) -> Promise<U> {
         let semaphore = DispatchSemaphore(value: 0)
-        var promise:Promise<U>?
+        var promise: Promise<U>?
         promiseHandler { value in
             promise = handler(value)
             semaphore.signal()
@@ -78,21 +78,21 @@ extension Promise {
 
 // Add delay , then api
 extension Promise {
-    func delay<U>(_ timer:TimeInterval  , _ handler:@escaping (R) -> U) -> Promise<U> {
+    func delay<U>(_ timer: TimeInterval  , _ handler: @escaping (R) -> U) -> Promise<U> {
         return map(delay: timer, handler:handler)
     }
     
-    func then(_ handler:@escaping (R) -> ()) {
+    func then(_ handler: @escaping (R) -> ()) {
         promiseHandler { value in
             handler(value)
         }
     }
     
-    func then<U>(_ handler:@escaping (R) -> Promise<U>) -> Promise<U> {
+    func then<U>(_ handler: @escaping (R) -> Promise<U>) -> Promise<U> {
         return flatMap(handler)
     }
     
-    func then<U>(_ handler:@escaping (R) -> U) -> Promise<U> {
+    func then<U>(_ handler: @escaping (R) -> U) -> Promise<U> {
         return map(handler)
     }
 }
